@@ -10,7 +10,8 @@
         "dependencies": {
           "InfluxDB.Client": "4.7.0",
           "ScottPlot": "4.1.59",
-          "ScottPlot.WinForms": "4.1.59"
+          "ScottPlot.WinForms": "4.1.59",
+          "System.ValueTuple": "4.5.0"
         },
         "runtime": {
           "Client_UI_Test1.dll": {}
@@ -204,6 +205,7 @@
           "System.Windows.Extensions": "6.0.0"
         }
       },
+      "System.ValueTuple/4.5.0": {},
       "System.Windows.Extensions/6.0.0": {
         "dependencies": {
           "System.Drawing.Common": "6.0.0"
@@ -391,6 +393,13 @@
       "sha512": "sha512-T/uuc7AklkDoxmcJ7LGkyX1CcSviZuLCa4jg3PekfJ7SU0niF0IVTXwUiNVP9DSpzou2PpxJ+eNY2IfDM90ZCg==",
       "path": "system.security.permissions/6.0.0",
       "hashPath": "system.security.permissions.6.0.0.nupkg.sha512"
+    },
+    "System.ValueTuple/4.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-okurQJO6NRE/apDIP23ajJ0hpiNmJ+f0BwOlB/cSqTLQlw5upkf+5+96+iG2Jw40G1fCVCyPz/FhIABUjMR+RQ==",
+      "path": "system.valuetuple/4.5.0",
+      "hashPath": "system.valuetuple.4.5.0.nupkg.sha512"
     },
     "System.Windows.Extensions/6.0.0": {
       "type": "package",

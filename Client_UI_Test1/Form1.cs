@@ -17,15 +17,18 @@ using System.Timers;
 
 namespace Client_UI_Test1
 {
+
+   
+
     public partial class Form1 : Form //test
     {
 
         private static System.Timers.Timer timer;
+        public bool timerStart = false;
 
         public Form1()
         {
             InitializeComponent();
-            Control.CheckForIllegalCrossThreadCalls = false;
         }
 
         private void Form1_Load_1(object sender, EventArgs e)
@@ -57,24 +60,32 @@ namespace Client_UI_Test1
 
         }
 
-        
-        private void button3_Click(object sender, EventArgs e)
-        {
-            timer = new System.Timers.Timer(2000);
-            timer.Elapsed += new ElapsedEventHandler(PlotTheGraphLive);
 
-            timer.Interval = 1000;
-            timer.Enabled = true;
+        private void button4_Click(object sender, EventArgs e)
+        {
+            timerStart = false;
         }
 
-        public void PlotTheGraphLive(object source, ElapsedEventArgs e)
+        private async void button3_Click(object sender, EventArgs e)
         {
-            var values = InitializeClient();
-            InfluxDBClient client = values.Item1;
-            string org = values.Item3;
+      
+            timerStart = true;
 
-            QueryDataAndPlotGraph(client, org);
+            while (timerStart)
+            {
+                await Task.Delay(3000);
+                var valuess = Task.Run(async () => await QueryData());
+                (double[] x, double[] y) = valuess.Result;
+
+
+                formsPlot2.Plot.AddScatter(x, y);
+                formsPlot2.Plot.XAxis.DateTimeFormat(true);
+                formsPlot2.Render(skipIfCurrentlyRendering: true);
+            }
+
         }
+
+
         
 
 
@@ -171,11 +182,63 @@ namespace Client_UI_Test1
 
         }
 
+        private async Task<(double[], double[])> QueryData()
+        {
+            string token_ = "INFLUX_TOKEN";
+            Environment.SetEnvironmentVariable(token_, "aG21wdV8_IYfyNLh_MSUoRd6a03CWu0t-aH1sAiUdiDj3Qp3FtTEhDsD7hKZ8ndDqBUahlFtzLlA5rxO7djb5A==");
+
+            var token = Environment.GetEnvironmentVariable(token_)!;
+            const string org = "yildirimbeyazit2";
+
+            var client = InfluxDBClientFactory.Create("http://localhost:8086", token);
+
+            /////////////////////////////////////////////////////////
+
+            List<double> valueList = new List<double>();
+            List<DateTime> timeList_ = new List<DateTime>();
+            //Flux Query
+            var query = "from(bucket: \"Database\") |> range(start: -1h)";
+            var tables = await client.GetQueryApi().QueryAsync(query, org);
+
+            double value_ = 0;
+            string time_ = "";
+            DateTime time_d = System.DateTime.Now;
+
+            foreach (var record in tables.SelectMany(table => table.Records).ToList())
+            {
+
+                if (record.GetTimeInDateTime() != null)
+                {
+                    time_ = record.GetTimeInDateTime().ToString();
+                }
+
+                if (record.GetValue() is IConvertible)
+                {
+                    value_ = ((IConvertible)record.GetValue()).ToDouble(null);
+                }
+
+                if (time_ != null)
+                {
+                    time_d = DateTime.Parse(time_);
+                }
+
+                timeList_.Add(time_d);
+                valueList.Add(value_);
+
+            }
+
+            double[] timeArray = timeList_.Select(x => x.ToOADate()).ToArray();
+            double[] valueArray = valueList.ToArray();
+
+            return (timeArray, valueArray);
+        
+        }
+
         private void panel3_Paint(object sender, PaintEventArgs e)
         {
 
         }
 
-       
+        
     }
 }
