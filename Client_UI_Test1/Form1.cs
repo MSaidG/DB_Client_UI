@@ -18,13 +18,10 @@ using System.Timers;
 namespace Client_UI_Test1
 {
 
-   
-
     public partial class Form1 : Form //test
     {
-
-        private static System.Timers.Timer timer;
-        public bool timerStart = false;
+        public bool plotTimerStart = false;
+        public bool sinTimerStart = false;
 
         public Form1()
         {
@@ -63,15 +60,15 @@ namespace Client_UI_Test1
 
         private void button4_Click(object sender, EventArgs e)
         {
-            timerStart = false;
+            plotTimerStart = false;
         }
 
         private async void button3_Click(object sender, EventArgs e)
         {
       
-            timerStart = true;
+            plotTimerStart = true;
 
-            while (timerStart)
+            while (plotTimerStart)
             {
                 await Task.Delay(3000);
                 var valuess = Task.Run(async () => await QueryData());
@@ -80,13 +77,35 @@ namespace Client_UI_Test1
 
                 formsPlot2.Plot.AddScatter(x, y);
                 formsPlot2.Plot.XAxis.DateTimeFormat(true);
-                formsPlot2.Render(skipIfCurrentlyRendering: true);
+                //formsPlot2.Render(skipIfCurrentlyRendering: true);
+                formsPlot2.Refresh();
             }
 
         }
 
+        private async void button5_Click(object sender, EventArgs e)
+        {
+            sinTimerStart = true;
+            float increment = 0;
+            while (sinTimerStart)
+            {
+                await Task.Delay(1000);
+                await Task.Run(() => WriteData(increment));
+                increment += 0.2f;
 
-        
+                if(increment == 360)
+                {
+                    increment = 0;
+                }
+            }
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            sinTimerStart= false;
+        }
+
+
 
 
         (InfluxDBClient, string, string) InitializeClient()
@@ -104,14 +123,24 @@ namespace Client_UI_Test1
             return (client, bucket, org);
         }
 
+        private void WriteSinDataToDataBase(InfluxDBClient client_, string bucket_, string org_, double t)
+        {
+
+            var point = PointData
+            .Measurement("mem_sin")
+            .Tag("host_sin", "host1_sin")
+            .Field("used_percent_sin", Math.Sin(t))
+            .Timestamp(DateTime.UtcNow, WritePrecision.Ns);
+
+            using (var writeApi = client_.GetWriteApi())
+            {
+                writeApi.WritePoint(point, bucket_, org_);
+            }
+        }
+
 
         private void WriteDataToDataBase(InfluxDBClient client_, string bucket_, string org_ )
         {
-            //InitializeClient();
-
-            List<double> valueList = new List<double>();
-            List<DateTime> timeList_ = new List<DateTime>();
-
             var point = PointData
             .Measurement("mem")
             .Tag("host", "host1")
@@ -130,7 +159,8 @@ namespace Client_UI_Test1
             List<double> valueList = new List<double>();
             List<DateTime> timeList_ = new List<DateTime>();
             //Flux Query
-            var query = "from(bucket: \"Database\") |> range(start: -1h)";
+            //var query = "from(bucket: \"Database\") |> range(start: 2019-08-28T22:00:00Z) |> filter(fn: (r) => r.measurement == \"mem\" and r.field == \"used_percent\" and r.host ==  \"host1\")";
+            var query = " from(bucket: \"Database\") |> range(start: 2019-08-28T22:00:00Z) |> filter(fn: (r) => r._measurement == \"mem\")";
             var tables = await client.GetQueryApi().QueryAsync(query, org_);
 
             double value_ = 0;
@@ -197,7 +227,8 @@ namespace Client_UI_Test1
             List<double> valueList = new List<double>();
             List<DateTime> timeList_ = new List<DateTime>();
             //Flux Query
-            var query = "from(bucket: \"Database\") |> range(start: -1h)";
+            //var query = " from(bucket: \"Database\") |> range(start: 2019-08-28T22:00:00Z) |> filter(fn: (r) => r._measurement == \"mem\")";
+            var query = " from(bucket: \"Database\") |> range(start: 2019-08-28T22:00:00Z) |> filter(fn: (r) => r._measurement == \"mem_sin\")";
             var tables = await client.GetQueryApi().QueryAsync(query, org);
 
             double value_ = 0;
@@ -234,11 +265,36 @@ namespace Client_UI_Test1
         
         }
 
+        private void WriteData(float t)
+        {
+
+            var values = InitializeClient();
+            InfluxDBClient client_ = values.Item1;
+            string bucket_ = values.Item2;
+            string org_ = values.Item3;
+
+            /////////////////////////////////////////////////////////
+            //Write Data
+
+            var point = PointData
+            .Measurement("mem_sin")
+            .Tag("host_sin", "host1_sin")
+            .Field("used_percent_sin", Math.Sin(t))
+            .Timestamp(DateTime.UtcNow, WritePrecision.Ns);
+
+            using (var writeApi = client_.GetWriteApi())
+            {
+                writeApi.WritePoint(point, bucket_, org_);
+            }
+
+
+        }
+
         private void panel3_Paint(object sender, PaintEventArgs e)
         {
 
         }
 
-        
+       
     }
 }

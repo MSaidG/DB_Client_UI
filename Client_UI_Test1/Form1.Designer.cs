@@ -36,12 +36,14 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.formsPlot1 = new ScottPlot.FormsPlot();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.button4 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.panel4 = new System.Windows.Forms.Panel();
             this.formsPlot2 = new ScottPlot.FormsPlot();
-            this.button4 = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
+            this.button6 = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -115,6 +117,8 @@
             // 
             // panel3
             // 
+            this.panel3.Controls.Add(this.button6);
+            this.panel3.Controls.Add(this.button5);
             this.panel3.Controls.Add(this.button4);
             this.panel3.Controls.Add(this.button3);
             this.panel3.Controls.Add(this.button2);
@@ -126,6 +130,17 @@
             this.panel3.Size = new System.Drawing.Size(200, 579);
             this.panel3.TabIndex = 1;
             this.panel3.Paint += new System.Windows.Forms.PaintEventHandler(this.panel3_Paint);
+            // 
+            // button4
+            // 
+            this.button4.Dock = System.Windows.Forms.DockStyle.Top;
+            this.button4.Location = new System.Drawing.Point(0, 189);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(200, 28);
+            this.button4.TabIndex = 4;
+            this.button4.Text = "Stop Timer";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // button3
             // 
@@ -178,16 +193,27 @@
             this.formsPlot2.TabIndex = 2;
             this.formsPlot2.Load += new System.EventHandler(this.formsPlot2_Load_1);
             // 
-            // button4
+            // button5
             // 
-            this.button4.Dock = System.Windows.Forms.DockStyle.Top;
-            this.button4.Location = new System.Drawing.Point(0, 189);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(200, 28);
-            this.button4.TabIndex = 4;
-            this.button4.Text = "Stop Timer";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            this.button5.Dock = System.Windows.Forms.DockStyle.Top;
+            this.button5.Location = new System.Drawing.Point(0, 217);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(200, 31);
+            this.button5.TabIndex = 5;
+            this.button5.Text = "Start(Write Sin)";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
+            // button6
+            // 
+            this.button6.Dock = System.Windows.Forms.DockStyle.Top;
+            this.button6.Location = new System.Drawing.Point(0, 248);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(200, 29);
+            this.button6.TabIndex = 6;
+            this.button6.Text = "Stop(Write Sin)";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
             // 
             // Form1
             // 
@@ -221,5 +247,7 @@
         private Button button2;
         private Button button3;
         private Button button4;
+        private Button button6;
+        private Button button5;
     }
 }
