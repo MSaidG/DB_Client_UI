@@ -22,6 +22,8 @@ namespace Client_UI_Test1
     {
         public bool plotTimerStart = false;
         public bool sinTimerStart = false;
+        public bool sinTimerStartForAnotherPCStart = false;
+        public bool plotTimerOfAnotherPCStart = false;
 
         public Form1()
         {
@@ -61,6 +63,29 @@ namespace Client_UI_Test1
         private void button4_Click(object sender, EventArgs e)
         {
             plotTimerStart = false;
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            plotTimerOfAnotherPCStart = false;
+        }
+
+        private async void button8_Click(object sender, EventArgs e)
+        {
+            plotTimerOfAnotherPCStart = true;
+
+            while (plotTimerStart)
+            {
+                await Task.Delay(3000);
+                var valuess = Task.Run(async () => await QueryDataOfAnotherPC());
+                (double[] x, double[] y) = valuess.Result;
+
+
+                formsPlot2.Plot.AddScatter(x, y);
+                formsPlot2.Plot.XAxis.DateTimeFormat(true);
+                //formsPlot2.Render(skipIfCurrentlyRendering: true);
+                formsPlot2.Refresh();
+            }
         }
 
         private async void button3_Click(object sender, EventArgs e)
@@ -123,6 +148,21 @@ namespace Client_UI_Test1
             return (client, bucket, org);
         }
 
+        (InfluxDBClient, string, string) InitializeClientForAnotherPc()
+        {
+            //Initialize The Client
+            string token_ = "INFLUX_TOKEN";
+            Environment.SetEnvironmentVariable(token_, "Ljtx7Tje95y6yglhSV0uxXo_5ehFbZ_pbwkJgHxLokDwSi8SBVlYv8ovP7N6bXoVv4OAulsS7iIWEpQk1Bw9ww==");
+
+            var token = Environment.GetEnvironmentVariable(token_)!;
+            const string bucket = "Database";
+            const string org = "Atilim";
+
+            var client = InfluxDBClientFactory.Create("http://25.20.87.75:8086", token);
+
+            return (client, bucket, org);
+        }
+
         private void WriteSinDataToDataBase(InfluxDBClient client_, string bucket_, string org_, double t)
         {
 
@@ -136,6 +176,30 @@ namespace Client_UI_Test1
             {
                 writeApi.WritePoint(point, bucket_, org_);
             }
+        }
+
+        private async void button7_Click(object sender, EventArgs e)
+        {
+            sinTimerStartForAnotherPCStart = true;
+            float increment = 0;
+            while (sinTimerStart)
+            {
+                await Task.Delay(1000);
+                await Task.Run(() => WriteDataToAnotherPC(increment));
+                increment += 0.2f;
+
+                if (increment == 360)
+                {
+                    increment = 0;
+                }
+            }
+
+            
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            sinTimerStartForAnotherPCStart = false;
         }
 
 
@@ -265,6 +329,59 @@ namespace Client_UI_Test1
         
         }
 
+        private async Task<(double[], double[])> QueryDataOfAnotherPC()
+        {
+            string token_ = "INFLUX_TOKEN";
+            Environment.SetEnvironmentVariable(token_, "Ljtx7Tje95y6yglhSV0uxXo_5ehFbZ_pbwkJgHxLokDwSi8SBVlYv8ovP7N6bXoVv4OAulsS7iIWEpQk1Bw9ww==");
+
+            var token = Environment.GetEnvironmentVariable(token_)!;
+            const string org = "Atilim";
+
+            var client = InfluxDBClientFactory.Create("http://25.20.87.75:8086", token);
+
+            /////////////////////////////////////////////////////////
+
+            List<double> valueList = new List<double>();
+            List<DateTime> timeList_ = new List<DateTime>();
+            //Flux Query
+            //var query = " from(bucket: \"Database\") |> range(start: 2019-08-28T22:00:00Z) |> filter(fn: (r) => r._measurement == \"mem\")";
+            var query = " from(bucket: \"Database\") |> range(start: 2019-08-28T22:00:00Z) |> filter(fn: (r) => r._measurement == \"mem_sin\")";
+            var tables = await client.GetQueryApi().QueryAsync(query, org);
+
+            double value_ = 0;
+            string time_ = "";
+            DateTime time_d = System.DateTime.Now;
+
+            foreach (var record in tables.SelectMany(table => table.Records).ToList())
+            {
+
+                if (record.GetTimeInDateTime() != null)
+                {
+                    time_ = record.GetTimeInDateTime().ToString();
+                }
+
+                if (record.GetValue() is IConvertible)
+                {
+                    value_ = ((IConvertible)record.GetValue()).ToDouble(null);
+                }
+
+                if (time_ != null)
+                {
+                    time_d = DateTime.Parse(time_);
+                }
+
+                timeList_.Add(time_d);
+                valueList.Add(value_);
+
+            }
+
+            double[] timeArray = timeList_.Select(x => x.ToOADate()).ToArray();
+            double[] valueArray = valueList.ToArray();
+
+            return (timeArray, valueArray);
+
+        }
+
         private void WriteData(float t)
         {
 
@@ -290,11 +407,37 @@ namespace Client_UI_Test1
 
         }
 
+        private void WriteDataToAnotherPC(float t)
+        {
+
+            var values = InitializeClientForAnotherPc();
+            InfluxDBClient client_ = values.Item1;
+            string bucket_ = values.Item2;
+            string org_ = values.Item3;
+
+            /////////////////////////////////////////////////////////
+            //Write Data
+
+            var point = PointData
+            .Measurement("mem_sin")
+            .Tag("host_sin", "host1_sin")
+            .Field("used_percent_sin", Math.Sin(t))
+            .Timestamp(DateTime.UtcNow, WritePrecision.Ns);
+
+            using (var writeApi = client_.GetWriteApi())
+            {
+                writeApi.WritePoint(point, bucket_, org_);
+            }
+
+            
+
+        }
+
         private void panel3_Paint(object sender, PaintEventArgs e)
         {
 
         }
 
-       
+        
     }
 }
