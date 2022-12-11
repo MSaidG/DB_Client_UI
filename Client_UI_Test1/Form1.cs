@@ -48,6 +48,15 @@ namespace Client_UI_Test1
 
         }
 
+        private void button11_Click(object sender, EventArgs e)
+        {
+            var values = InitializeClientForAnotherPc();
+            InfluxDBClient client = values.Item1;
+            string org = values.Item3;
+
+            QueryDataAndPlotGraph(client, org);
+        }
+
         private void formsPlot2_Load_1(object sender, EventArgs e)
         {
 
@@ -74,7 +83,7 @@ namespace Client_UI_Test1
         {
             plotTimerOfAnotherPCStart = true;
 
-            while (plotTimerStart)
+            while (plotTimerOfAnotherPCStart)
             {
                 await Task.Delay(3000);
                 var valuess = Task.Run(async () => await QueryDataOfAnotherPC());
@@ -152,13 +161,13 @@ namespace Client_UI_Test1
         {
             //Initialize The Client
             string token_ = "INFLUX_TOKEN";
-            Environment.SetEnvironmentVariable(token_, "Ljtx7Tje95y6yglhSV0uxXo_5ehFbZ_pbwkJgHxLokDwSi8SBVlYv8ovP7N6bXoVv4OAulsS7iIWEpQk1Bw9ww==");
+            Environment.SetEnvironmentVariable(token_, "O7cVcjsN0suvWsd2xJZClEvWFibCag6Ti3eUaVnhKoWu5sOD-1ptTH4KgYQnuGo6B9mE9Cu8uq317Wdr-_LBPQ==");
 
             var token = Environment.GetEnvironmentVariable(token_)!;
             const string bucket = "Database";
             const string org = "Atilim";
 
-            var client = InfluxDBClientFactory.Create("http://25.20.87.75:8086", token);
+            var client = InfluxDBClientFactory.Create("http://25.65.174.239:8086", token);
 
             return (client, bucket, org);
         }
@@ -182,7 +191,7 @@ namespace Client_UI_Test1
         {
             sinTimerStartForAnotherPCStart = true;
             float increment = 0;
-            while (sinTimerStart)
+            while (sinTimerStartForAnotherPCStart)
             {
                 await Task.Delay(1000);
                 await Task.Run(() => WriteDataToAnotherPC(increment));
@@ -217,14 +226,17 @@ namespace Client_UI_Test1
             }
         }
 
+
+
         private async void QueryDataAndPlotGraph(InfluxDBClient client, string org_)
         {
-
+            HttpClient httpClient = new HttpClient();
+            httpClient.Timeout = TimeSpan.FromMinutes(30);
             List<double> valueList = new List<double>();
             List<DateTime> timeList_ = new List<DateTime>();
             //Flux Query
             //var query = "from(bucket: \"Database\") |> range(start: 2019-08-28T22:00:00Z) |> filter(fn: (r) => r.measurement == \"mem\" and r.field == \"used_percent\" and r.host ==  \"host1\")";
-            var query = " from(bucket: \"Database\") |> range(start: 2019-08-28T22:00:00Z) |> filter(fn: (r) => r._measurement == \"mem\")";
+            var query = " from(bucket: \"Database\") |> range(start: 2019-08-28T22:00:00Z) |> filter(fn: (r) => r._measurement == \"mem_sin\") ";
             var tables = await client.GetQueryApi().QueryAsync(query, org_);
 
             double value_ = 0;
@@ -275,6 +287,10 @@ namespace Client_UI_Test1
 
 
         }
+
+        
+
+
 
         private async Task<(double[], double[])> QueryData()
         {
@@ -329,15 +345,17 @@ namespace Client_UI_Test1
         
         }
 
+
+
         private async Task<(double[], double[])> QueryDataOfAnotherPC()
         {
             string token_ = "INFLUX_TOKEN";
-            Environment.SetEnvironmentVariable(token_, "Ljtx7Tje95y6yglhSV0uxXo_5ehFbZ_pbwkJgHxLokDwSi8SBVlYv8ovP7N6bXoVv4OAulsS7iIWEpQk1Bw9ww==");
+            Environment.SetEnvironmentVariable(token_, "O7cVcjsN0suvWsd2xJZClEvWFibCag6Ti3eUaVnhKoWu5sOD-1ptTH4KgYQnuGo6B9mE9Cu8uq317Wdr-_LBPQ==");
 
             var token = Environment.GetEnvironmentVariable(token_)!;
             const string org = "Atilim";
 
-            var client = InfluxDBClientFactory.Create("http://25.20.87.75:8086", token);
+            var client = InfluxDBClientFactory.Create("http://25.65.174.239:8086", token);
 
             /////////////////////////////////////////////////////////
 
