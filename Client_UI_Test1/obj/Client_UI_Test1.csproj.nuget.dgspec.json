@@ -51,6 +51,10 @@
             "ScottPlot.WinForms": {
               "target": "Package",
               "version": "[4.1.59, )"
+            },
+            "System.ValueTuple": {
+              "target": "Package",
+              "version": "[4.5.0, )"
             }
           },
           "imports": [

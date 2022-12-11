@@ -12,6 +12,7 @@
     <PackageReference Include="InfluxDB.Client" Version="4.7.0" />
     <PackageReference Include="ScottPlot" Version="4.1.59" />
     <PackageReference Include="ScottPlot.WinForms" Version="4.1.59" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>
