@@ -18,6 +18,8 @@ using System.Timers;
     https://stackoverflow.com/
 */
 
+//To see the data closer, while pressing down mouse rigt click, drag mouse right
+
 namespace Client_UI_Test1
 {
 
@@ -84,7 +86,7 @@ namespace Client_UI_Test1
 
 
         //Run on another thread using Task 
-        //Task Delay Wait approximately 3 sec for task to complete
+        //Task Delay Wait approximately 1 sec for task to complete
         //Task Delay Could be reduced to decrease refreshing time of data
         private async void StartPlottingLiveData_Button(object sender, EventArgs e)
         {
@@ -95,7 +97,7 @@ namespace Client_UI_Test1
             {
                 
                 var valuesLocal = Task.Run(async () => await QueryData_Task());
-                await Task.Delay(3000);
+                await Task.Delay(1000);
                 (double[] x, double[] y) = valuesLocal.Result;
 
 

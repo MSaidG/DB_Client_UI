@@ -139,7 +139,6 @@
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(200, 579);
             this.panel3.TabIndex = 1;
-            //this.panel3.Paint += new System.Windows.Forms.PaintEventHandler(this.panel3_Paint);
             // 
             // button11
             // 
@@ -148,7 +147,7 @@
             this.button11.Name = "button11";
             this.button11.Size = new System.Drawing.Size(200, 32);
             this.button11.TabIndex = 11;
-            this.button11.Text = "Get Data From Another PC";
+            this.button11.Text = "Query Data Of Remote PC ";
             this.button11.UseVisualStyleBackColor = true;
             this.button11.Click += new System.EventHandler(this.QueryDataOfRemotePC_Button);
             // 
@@ -159,7 +158,7 @@
             this.button9.Name = "button9";
             this.button9.Size = new System.Drawing.Size(200, 52);
             this.button9.TabIndex = 9;
-            this.button9.Text = "Plot The Data of Another PC /Stop";
+            this.button9.Text = "Stop Plotting Live Data Of Remote PC";
             this.button9.UseVisualStyleBackColor = true;
             this.button9.Click += new System.EventHandler(this.StopPlottingLiveDataOfRemotePC_Button);
             // 
@@ -170,7 +169,7 @@
             this.button8.Name = "button8";
             this.button8.Size = new System.Drawing.Size(200, 54);
             this.button8.TabIndex = 8;
-            this.button8.Text = "Plot The Data of Another PC /Start";
+            this.button8.Text = "Start Plotting Live Data Of Remote PC";
             this.button8.UseVisualStyleBackColor = true;
             this.button8.Click += new System.EventHandler(this.StartPlottingLiveDataOfRemotePC_Button);
             // 
@@ -181,7 +180,7 @@
             this.button10.Name = "button10";
             this.button10.Size = new System.Drawing.Size(200, 49);
             this.button10.TabIndex = 10;
-            this.button10.Text = "Write Sin Data To Another PC /Stop";
+            this.button10.Text = "Stop Sending Sin Data To Remote PC";
             this.button10.UseVisualStyleBackColor = true;
             this.button10.Click += new System.EventHandler(this.StopSendingSinDataToRemotePC_Button);
             // 
@@ -192,7 +191,7 @@
             this.button7.Name = "button7";
             this.button7.Size = new System.Drawing.Size(200, 59);
             this.button7.TabIndex = 7;
-            this.button7.Text = "Write Sin Data To Another PC /Start";
+            this.button7.Text = "Start Sending Sin Data To Remote PC";
             this.button7.UseVisualStyleBackColor = true;
             this.button7.Click += new System.EventHandler(this.StartSendingSinDataToRemotePC_Button);
             // 
@@ -203,7 +202,7 @@
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(200, 29);
             this.button6.TabIndex = 6;
-            this.button6.Text = "Stop(Write Sin)";
+            this.button6.Text = "Stop Sending Sin Data";
             this.button6.UseVisualStyleBackColor = true;
             this.button6.Click += new System.EventHandler(this.StopSendingSinData_Button);
             // 
@@ -214,7 +213,7 @@
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(200, 31);
             this.button5.TabIndex = 5;
-            this.button5.Text = "Start(Write Sin)";
+            this.button5.Text = "Start Sending Sin Data";
             this.button5.UseVisualStyleBackColor = true;
             this.button5.Click += new System.EventHandler(this.StartSendingSinData_Button);
             // 
@@ -225,7 +224,7 @@
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(200, 28);
             this.button4.TabIndex = 4;
-            this.button4.Text = "Stop Timer";
+            this.button4.Text = "Stop Plotting Live Data";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.StopPlottingLiveData_Button);
             // 
@@ -236,7 +235,7 @@
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(200, 26);
             this.button3.TabIndex = 3;
-            this.button3.Text = "Start Timer";
+            this.button3.Text = "Start Plotting Live Data";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.StartPlottingLiveData_Button);
             // 
