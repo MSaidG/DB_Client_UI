@@ -11,19 +11,23 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Timers;
 
-
-
-
+/*
+    References
+    https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/task-based-asynchronous-pattern-tap
+    https://docs.influxdata.com/influxdb/v2.5/
+    https://stackoverflow.com/
+*/
 
 namespace Client_UI_Test1
 {
 
     public partial class Form1 : Form //test
     {
-        public bool plotTimerStart = false;
-        public bool sinTimerStart = false;
-        public bool sinTimerStartForAnotherPCStart = false;
-        public bool plotTimerOfAnotherPCStart = false;
+        //To Check Timers For Continuous Jobs 
+        public bool IsPlotTimerOn = false;
+        public bool IsSinTimerOn = false;
+        public bool IsSinTimerForRemotePCOn = false;
+        public bool IsPlotTimerOfRemotePCOn = false;
 
         public Form1()
         {
@@ -35,7 +39,7 @@ namespace Client_UI_Test1
             
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void QueryAndWrite_Button(object sender, EventArgs e)
         {
             var values = InitializeClient();
             InfluxDBClient client = values.Item1;
@@ -48,15 +52,102 @@ namespace Client_UI_Test1
 
         }
 
-        private void button11_Click(object sender, EventArgs e)
+        private void QueryDataOfRemotePC_Button(object sender, EventArgs e)
         {
-            var values = InitializeClientForAnotherPc();
+            var values = InitializeClientForRemotePc();
             InfluxDBClient client = values.Item1;
             string org = values.Item3;
 
             QueryDataAndPlotGraph(client, org);
         }
 
+
+        //Run on another thread using Task 
+        //Task Delay Wait approximately 3 sec for task to complete
+        //Especially this fucntion should wait 3 sec because remote accessing is slower than local accessing
+        private async void StartPlottingLiveDataOfRemotePC_Button(object sender, EventArgs e)
+        {
+            IsPlotTimerOfRemotePCOn = true;
+
+            while (IsPlotTimerOfRemotePCOn)
+            {
+                var valuesRemote = Task.Run(async () => await QueryDataOfRemotePC_Task());
+                await Task.Delay(3000);
+                (double[] a, double[] b) = valuesRemote.Result;
+
+                formsPlot2.Plot.AddScatter(a, b);
+                formsPlot2.Plot.XAxis.DateTimeFormat(true);
+                //formsPlot2.Render();
+               
+            }
+        }
+
+
+        //Run on another thread using Task 
+        //Task Delay Wait approximately 3 sec for task to complete
+        //Task Delay Could be reduced to decrease refreshing time of data
+        private async void StartPlottingLiveData_Button(object sender, EventArgs e)
+        {
+
+            IsPlotTimerOn = true;
+
+            while (IsPlotTimerOn)
+            {
+                
+                var valuesLocal = Task.Run(async () => await QueryData_Task());
+                await Task.Delay(3000);
+                (double[] x, double[] y) = valuesLocal.Result;
+
+
+                formsPlot2.Plot.AddScatter(x, y);
+                formsPlot2.Plot.XAxis.DateTimeFormat(true);
+                //formsPlot2.Render();
+                
+            }
+
+        }
+
+        //Sending Sin Data every 1 sec and increase value of sin 0.2 every sec
+        private async void StartSendingSinData_Button(object sender, EventArgs e)
+        {
+            IsSinTimerOn = true;
+            float increment = 0;
+            while (IsSinTimerOn)
+            {
+                
+                await Task.Run(() => WriteData(increment));
+                await Task.Delay(1000);
+                increment += 0.2f;
+
+                if (increment == 360)
+                {
+                    increment = 0;
+                }
+            }
+        }
+
+        //Sending Sin Data every 1 sec and increase value of sin 0.2 every sec
+        private async void StartSendingSinDataToRemotePC_Button(object sender, EventArgs e)
+        {
+            IsSinTimerForRemotePCOn = true;
+            float increment = 0;
+            while (IsSinTimerForRemotePCOn)
+            {
+                
+                await Task.Run(() => WriteDataToRemotePC(increment));
+                await Task.Delay(1000);
+                increment += 0.2f;
+
+                if (increment == 360)
+                {
+                    increment = 0;
+                }
+            }
+
+
+        }
+
+        //While loading the UI plot the local data
         private void formsPlot2_Load_1(object sender, EventArgs e)
         {
 
@@ -69,151 +160,70 @@ namespace Client_UI_Test1
         }
 
 
-        private void button4_Click(object sender, EventArgs e)
+        //Stop continuous functions
+        private void StopPlottingLiveData_Button(object sender, EventArgs e)
         {
-            plotTimerStart = false;
+            IsPlotTimerOn = false;
         }
 
-        private void button9_Click(object sender, EventArgs e)
+        private void StopPlottingLiveDataOfRemotePC_Button(object sender, EventArgs e)
         {
-            plotTimerOfAnotherPCStart = false;
+            IsPlotTimerOfRemotePCOn = false;
+        }
+       
+        private void StopSendingSinData_Button(object sender, EventArgs e)
+        {
+            IsSinTimerOn= false;
         }
 
-        private async void button8_Click(object sender, EventArgs e)
+        private void StopSendingSinDataToRemotePC_Button(object sender, EventArgs e)
         {
-            plotTimerOfAnotherPCStart = true;
-
-            while (plotTimerOfAnotherPCStart)
-            {
-                await Task.Delay(3000);
-                var valuess = Task.Run(async () => await QueryDataOfAnotherPC());
-                (double[] x, double[] y) = valuess.Result;
-
-
-                formsPlot2.Plot.AddScatter(x, y);
-                formsPlot2.Plot.XAxis.DateTimeFormat(true);
-                //formsPlot2.Render(skipIfCurrentlyRendering: true);
-                formsPlot2.Refresh();
-            }
-        }
-
-        private async void button3_Click(object sender, EventArgs e)
-        {
-      
-            plotTimerStart = true;
-
-            while (plotTimerStart)
-            {
-                await Task.Delay(3000);
-                var valuess = Task.Run(async () => await QueryData());
-                (double[] x, double[] y) = valuess.Result;
-
-
-                formsPlot2.Plot.AddScatter(x, y);
-                formsPlot2.Plot.XAxis.DateTimeFormat(true);
-                //formsPlot2.Render(skipIfCurrentlyRendering: true);
-                formsPlot2.Refresh();
-            }
-
-        }
-
-        private async void button5_Click(object sender, EventArgs e)
-        {
-            sinTimerStart = true;
-            float increment = 0;
-            while (sinTimerStart)
-            {
-                await Task.Delay(1000);
-                await Task.Run(() => WriteData(increment));
-                increment += 0.2f;
-
-                if(increment == 360)
-                {
-                    increment = 0;
-                }
-            }
-        }
-
-        private void button6_Click(object sender, EventArgs e)
-        {
-            sinTimerStart= false;
+            IsSinTimerForRemotePCOn = false;
         }
 
 
-
-
+        //Initialize local client and return necessary values for Query and Writing operations
         (InfluxDBClient, string, string) InitializeClient()
         {
             //Initialize The Client
             string token_ = "INFLUX_TOKEN";
+            //Token ID (you get it when you first create a token)
             Environment.SetEnvironmentVariable(token_, "aG21wdV8_IYfyNLh_MSUoRd6a03CWu0t-aH1sAiUdiDj3Qp3FtTEhDsD7hKZ8ndDqBUahlFtzLlA5rxO7djb5A==");
 
             var token = Environment.GetEnvironmentVariable(token_)!;
             const string bucket = "Database";
             const string org = "yildirimbeyazit2";
-
+            //Client: "http://(PUBLIC IP):(PORT)" 
             var client = InfluxDBClientFactory.Create("http://localhost:8086", token);
 
             return (client, bucket, org);
         }
 
-        (InfluxDBClient, string, string) InitializeClientForAnotherPc()
+        //Initialize remote pc client and return necessary values for Query and Writing operations
+        (InfluxDBClient, string, string) InitializeClientForRemotePc()
         {
             //Initialize The Client
             string token_ = "INFLUX_TOKEN";
+            //Token ID (you get it when you first create a token)
             Environment.SetEnvironmentVariable(token_, "O7cVcjsN0suvWsd2xJZClEvWFibCag6Ti3eUaVnhKoWu5sOD-1ptTH4KgYQnuGo6B9mE9Cu8uq317Wdr-_LBPQ==");
 
             var token = Environment.GetEnvironmentVariable(token_)!;
             const string bucket = "Database";
             const string org = "Atilim";
-
+            //Client: "http://(PUBLIC IP):(PORT)"
             var client = InfluxDBClientFactory.Create("http://25.65.174.239:8086", token);
 
             return (client, bucket, org);
-        }
+        }     
 
-        private void WriteSinDataToDataBase(InfluxDBClient client_, string bucket_, string org_, double t)
-        {
-
-            var point = PointData
-            .Measurement("mem_sin")
-            .Tag("host_sin", "host1_sin")
-            .Field("used_percent_sin", Math.Sin(t))
-            .Timestamp(DateTime.UtcNow, WritePrecision.Ns);
-
-            using (var writeApi = client_.GetWriteApi())
-            {
-                writeApi.WritePoint(point, bucket_, org_);
-            }
-        }
-
-        private async void button7_Click(object sender, EventArgs e)
-        {
-            sinTimerStartForAnotherPCStart = true;
-            float increment = 0;
-            while (sinTimerStartForAnotherPCStart)
-            {
-                await Task.Delay(1000);
-                await Task.Run(() => WriteDataToAnotherPC(increment));
-                increment += 0.2f;
-
-                if (increment == 360)
-                {
-                    increment = 0;
-                }
-            }
-
-            
-        }
-
-        private void button10_Click(object sender, EventArgs e)
-        {
-            sinTimerStartForAnotherPCStart = false;
-        }
-
-
+        //Write Data to bucket(Database)
+        
         private void WriteDataToDataBase(InfluxDBClient client_, string bucket_, string org_ )
         {
+            //measurement is table in sql
+            //tags are indexed columns in sql
+            //fields are unindexed columns in sql
+            //points are rows in sql
             var point = PointData
             .Measurement("mem")
             .Tag("host", "host1")
@@ -230,8 +240,8 @@ namespace Client_UI_Test1
 
         private async void QueryDataAndPlotGraph(InfluxDBClient client, string org_)
         {
-            HttpClient httpClient = new HttpClient();
-            httpClient.Timeout = TimeSpan.FromMinutes(30);
+            //from(bucket: "(BUCKET_NAME)") |> range(start: (TIME)) |> filter(fn: (r) => r._measurement == "(MEASUREMENT NAME)") ";
+
             List<double> valueList = new List<double>();
             List<DateTime> timeList_ = new List<DateTime>();
             //Flux Query
@@ -269,21 +279,9 @@ namespace Client_UI_Test1
             double[] timeArray = timeList_.Select(x => x.ToOADate()).ToArray();
             double[] valueArray = valueList.ToArray();
 
-            if (timeArray != null && valueArray != null)
-            {
-                formsPlot2.Plot.AddScatter(timeArray, valueArray);
-                formsPlot2.Plot.XAxis.DateTimeFormat(true);
-                formsPlot2.Render();
-            }
-
-            else
-            {
-                double[] dataX = new double[] { 1, 2, 3, 4, 5 };
-                double[] dataY = new double[] { 1, 4, 9, 16, 25 };
-                formsPlot2.Plot.AddScatter(dataX, dataY);
-                formsPlot2.Render();
-
-            }
+            formsPlot2.Plot.AddScatter(timeArray, valueArray);
+            formsPlot2.Plot.XAxis.DateTimeFormat(true);
+            formsPlot2.Render();
 
 
         }
@@ -291,8 +289,8 @@ namespace Client_UI_Test1
         
 
 
-
-        private async Task<(double[], double[])> QueryData()
+        //To be able to return a value from asynchronous operation Task used
+        private async Task<(double[], double[])> QueryData_Task()
         {
             string token_ = "INFLUX_TOKEN";
             Environment.SetEnvironmentVariable(token_, "aG21wdV8_IYfyNLh_MSUoRd6a03CWu0t-aH1sAiUdiDj3Qp3FtTEhDsD7hKZ8ndDqBUahlFtzLlA5rxO7djb5A==");
@@ -346,8 +344,8 @@ namespace Client_UI_Test1
         }
 
 
-
-        private async Task<(double[], double[])> QueryDataOfAnotherPC()
+        //To be able to return a value from asynchronous operation Task used
+        private async Task<(double[], double[])> QueryDataOfRemotePC_Task()
         {
             string token_ = "INFLUX_TOKEN";
             Environment.SetEnvironmentVariable(token_, "O7cVcjsN0suvWsd2xJZClEvWFibCag6Ti3eUaVnhKoWu5sOD-1ptTH4KgYQnuGo6B9mE9Cu8uq317Wdr-_LBPQ==");
@@ -425,10 +423,10 @@ namespace Client_UI_Test1
 
         }
 
-        private void WriteDataToAnotherPC(float t)
+        private void WriteDataToRemotePC(float t)
         {
 
-            var values = InitializeClientForAnotherPc();
+            var values = InitializeClientForRemotePc();
             InfluxDBClient client_ = values.Item1;
             string bucket_ = values.Item2;
             string org_ = values.Item3;
@@ -448,11 +446,6 @@ namespace Client_UI_Test1
             }
 
             
-
-        }
-
-        private void panel3_Paint(object sender, PaintEventArgs e)
-        {
 
         }
 
