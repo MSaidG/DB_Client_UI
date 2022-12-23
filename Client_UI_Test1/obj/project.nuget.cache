@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "LkPg83D9AJwnbhX3NEzTLbbVMJY67XcBdeqvg7gL9v315IWiOmf6zW5YLVHmsiOBX3X8FHKmBQOkq29vNCiGEw==",
+  "dgSpecHash": "vEh0K4KOPghNSsraSQynQgjrtnxU6v7QQCcBcmmn+u5jvUdT6ycrskQGV/OckwmbYUjPZOPamgFxi8acKyySpw==",
   "success": true,
   "projectFilePath": "C:\\Users\\Said\\source\\repos\\MSaidG\\Said\\Client_UI_Test1\\Client_UI_Test1.csproj",
   "expectedPackageFiles": [
@@ -32,12 +32,5 @@
     "C:\\Users\\Said\\.nuget\\packages\\system.valuetuple\\4.5.0\\system.valuetuple.4.5.0.nupkg.sha512",
     "C:\\Users\\Said\\.nuget\\packages\\system.windows.extensions\\6.0.0\\system.windows.extensions.6.0.0.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "Undefined",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Problem reading the cache file C:\\Users\\Said\\source\\repos\\MSaidG\\Said\\Client_UI_Test1\\obj\\project.nuget.cache : Invalid property identifier character: <. Path 'version', line 3, position 0."
-    }
-  ]
+  "logs": []
 }

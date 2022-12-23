@@ -74,7 +74,7 @@ namespace Client_UI_Test1
             while (IsPlotTimerOfRemotePCOn)
             {
                 var valuesRemote = Task.Run(async () => await QueryDataOfRemotePC_Task());
-                await Task.Delay(3000);
+                await Task.Delay(9000);
                 (double[] a, double[] b) = valuesRemote.Result;
 
                 formsPlot2.Plot.AddScatter(a, b);
@@ -103,7 +103,7 @@ namespace Client_UI_Test1
 
                 formsPlot2.Plot.AddScatter(x, y);
                 formsPlot2.Plot.XAxis.DateTimeFormat(true);
-                //formsPlot2.Render();
+                formsPlot2.Render();
                 
             }
 
@@ -213,7 +213,7 @@ namespace Client_UI_Test1
             const string bucket = "Database";
             const string org = "Atilim";
             //Client: "http://(PUBLIC IP):(PORT)"
-            var client = InfluxDBClientFactory.Create("http://25.65.174.239:8086", token);
+            var client = InfluxDBClientFactory.Create("http://25.65.174.239:8086?timeout=900000&logLevel=BASIC", token);
 
             return (client, bucket, org);
         }     
@@ -246,6 +246,9 @@ namespace Client_UI_Test1
 
             List<double> valueList = new List<double>();
             List<DateTime> timeList_ = new List<DateTime>();
+
+            //var client_ = new InfluxDBClient("http://25.65.174.239:8086?timeout=900000&logLevel=BASIC");
+            client.EnableGzip();
             //Flux Query
             //var query = "from(bucket: \"Database\") |> range(start: 2019-08-28T22:00:00Z) |> filter(fn: (r) => r.measurement == \"mem\" and r.field == \"used_percent\" and r.host ==  \"host1\")";
             var query = " from(bucket: \"Database\") |> range(start: 2019-08-28T22:00:00Z) |> filter(fn: (r) => r._measurement == \"mem_sin\") ";
@@ -355,7 +358,7 @@ namespace Client_UI_Test1
             var token = Environment.GetEnvironmentVariable(token_)!;
             const string org = "Atilim";
 
-            var client = InfluxDBClientFactory.Create("http://25.65.174.239:8086", token);
+            var client = InfluxDBClientFactory.Create("http://25.65.174.239:8086?timeout=90000", token);
 
             /////////////////////////////////////////////////////////
 
