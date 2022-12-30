@@ -42,15 +42,15 @@
           "dependencies": {
             "InfluxDB.Client": {
               "target": "Package",
-              "version": "[4.7.0, )"
+              "version": "[4.9.0, )"
             },
             "ScottPlot": {
               "target": "Package",
-              "version": "[4.1.59, )"
+              "version": "[4.1.60, )"
             },
             "ScottPlot.WinForms": {
               "target": "Package",
-              "version": "[4.1.59, )"
+              "version": "[4.1.60, )"
             },
             "System.ValueTuple": {
               "target": "Package",
